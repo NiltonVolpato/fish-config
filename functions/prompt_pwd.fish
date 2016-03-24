@@ -1,6 +1,7 @@
-function prompt_pwd --description 'Print the current working directory'
-	set -l args_post
-	set -l args_pre -e 's|^/private/|/|'
-	set -l realhome ~
-	echo $PWD | sed -e "s|^$realhome|~|" $args_pre $args_post
+function prompt_pwd --description 'Prints the current working directory'
+  set -l home ~
+  echo $PWD | sed \
+      -e "s|^$home|~|" \
+      -e 's|/google/src/cloud/nilton/|@|' \
+      -e 's|^/private/|/|'
 end
