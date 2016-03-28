@@ -1,34 +1,35 @@
+#set -g __prompt_sep '>'
+set -g __prompt_sep \uE0B1
+
 function fish_prompt --description 'Write out the prompt'
-  set -l last_status $status
+  set -l suffix
+  switch $USER
+    case root toor
+      set_color $fish_color_cwd_root
+    case '*'
+      set_color $fish_color_cwd
+  end
 
-	#if [ -n "$LAST_CMDLINE" ]
-	  set_color $fish_color_autosuggestion[1]
-		echo "❭❭❭ $last_status ‖ elapsed "(humanize_duration $CMD_DURATION)" ❬❬❬"
-		set_color normal
-	#end
-
-	set -l color_cwd
-	set -l suffix
-	switch $USER
-		case root toor
-			if set -q fish_color_cwd_root
-				set color_cwd $fish_color_cwd_root
-			else
-				set color_cwd $fish_color_cwd
-			end
-			set suffix '#'
-		case '*'
-			set color_cwd $fish_color_cwd
-			set suffix '❯'
-	end
-
-	echo -n -s (set_color $color_cwd) "$USER" ' ' (set_color normal) "$suffix "
+  echo -n -s "$USER" ' ' (set_color normal) "$__prompt_sep "
 end
 
 function maybe_execute
   set -l CMDLINE (commandline)
-	if [ -n "$CMDLINE" ]
-	  commandline -f execute
-	end
+  if [ -n "$CMDLINE" ]
+    commandline -f execute
+  end
 end
 # bind \n maybe_execute
+
+function command_summary --on-event fish_postexec
+  # Save the last status for later, otherwise any command will override it.
+  set -l last_status $status
+
+  [ -z "$argv" ]; and return
+  [ "$CMD_DURATION" -lt 100 ]; and return
+
+  set_color $fish_color_autosuggestion[1]
+  echo -n Elapsed: (humanize_duration $CMD_DURATION)
+  set_color normal
+  echo
+end
